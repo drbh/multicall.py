@@ -1,7 +1,8 @@
 from decimal import Decimal
 from web3.datastructures import AttributeDict
+from web3 import Web3
 from multicall import Call, Multicall
-
+import os
 
 MCD_VAT = '0x35d1b3f3d7966a1dfe207aa4514c12a259a0492b'
 MCD_VOW = '0xa950524441892a31ebddf91d3ceefa04bf454466'
@@ -68,46 +69,47 @@ def get_fee(base, jug):
     return calc_fee(base + jug['duty'])
 
 
-multi = Multicall([
-    Call(MCD_VAT, ['Line()(uint256)'], [['Line', from_rad]]),
-    Call(MCD_VAT, ['debt()(uint256)'], [['debt', from_rad]]),
-    Call(MCD_VAT, ['vice()(uint256)'], [['vice', from_rad]]),
-    Call(MCD_VAT, ['dai(address)(uint256)', MCD_VOW], [['vow_dai', from_rad]]),
-    Call(MCD_VAT, ['sin(address)(uint256)', MCD_VOW], [['vow_sin', from_rad]]),
-    Call(MCD_VAT, ['ilks(bytes32)((uint256,uint256,uint256,uint256,uint256))', b'ETH-A'], [['eth_ilk', from_ilk]]),
-    Call(MCD_VAT, ['ilks(bytes32)((uint256,uint256,uint256,uint256,uint256))', b'BAT-A'], [['bat_ilk', from_ilk]]),
-    Call(MCD_VAT, ['ilks(bytes32)((uint256,uint256,uint256,uint256,uint256))', b'SAI'], [['sai_ilk', from_ilk]]),
-    Call(MCD_VOW, ['hump()(uint256)'], [['surplus_buffer', from_rad]]),
-    Call(MCD_VOW, ['sump()(uint256)'], [['debt_size', from_rad]]),
-    Call(MCD_VOW, ['Ash()(uint256)'], [['ash', from_rad]]),
-    Call(MCD_VOW, ['Sin()(uint256)'], [['sin', from_rad]]),
-    Call(MCD_DAI, ['totalSupply()(uint256)'], [['dai_supply', from_wad]]),
-    Call(MCD_DAI, ['balanceOf(address)(uint256)', UNISWAP_EXCHANGE], [['uniswap_dai', from_wad]]),
-    Call(SAI, ['totalSupply()(uint256)'], [['sai_supply', from_wad]]),
-    Call(SAI, ['balanceOf(address)(uint256)', MCD_JOIN_SAI], [['sai_locked', from_wad]]),
-    Call(MCD_GOV, ['balanceOf(address)(uint256)', GEM_PIT], [['gem_pit', from_wad]]),
-    Call(ETH, ['balanceOf(address)(uint256)', MCD_JOIN_ETH_A], [['eth_locked', from_wad]]),
-    Call(BAT, ['totalSupply()(uint256)'], [['bat_supply', from_wad]]),
-    Call(BAT, ['balanceOf(address)(uint256)', MCD_JOIN_BAT_A], [['bat_locked', from_wad]]),
-    Call(MCD_POT, ['Pie()(uint256)'], [['savings_pie', from_wad]]),
-    Call(MCD_POT, ['chi()(uint256)'], [['pie_chi', from_ray]]),
-    Call(MCD_POT, ['rho()(uint256)'], [['pot_drip', None]]),
-    Call(MCD_POT, ['dsr()(uint256)'], [['dsr', from_ray]]),
-    Call(CDP_MANAGER, ['cdpi()(uint256)'], [['cdps', None]]),
-    Call(MCD_JUG, ['base()(uint256)'], [['base', from_ray]]),
-    Call(MCD_JUG, ['ilks(bytes32)((uint256,uint256))', b'ETH-A'], [['eth_jug', from_jug]]),
-    Call(MCD_JUG, ['ilks(bytes32)((uint256,uint256))', b'BAT-A'], [['bat_jug', from_jug]]),
-    Call(MCD_JUG, ['ilks(bytes32)((uint256,uint256))', b'SAI'], [['sai_jug', from_jug]]),
-    Call(MCD_FLIP_ETH_A, ['kicks()(uint256)'], [['eth_kicks', None]]),
-    Call(MCD_FLIP_BAT_A, ['kicks()(uint256)'], [['bat_kicks', None]]),
-    Call(MCD_SPOT, ['ilks(bytes32)((address,uint256))', b'ETH-A'], [['eth_mat', from_spot]]),
-    Call(MCD_SPOT, ['ilks(bytes32)((address,uint256))', b'BAT-A'], [['bat_mat', from_spot]]),
-    Call(CHAI, ['totalSupply()(uint256)'], [['chai_supply', from_wad]]),
-    Call(MCD_GOV, ['totalSupply()(uint256)'], [['mkr_supply', from_wad]]),
-])
-
-
 def fetch_data():
+    w3 = Web3(Web3.HTTPProvider(os.environ.get('ETH_NODE_URL',"<YouNeedToSetThis>")))
+    multi = Multicall([
+        Call(MCD_VAT, ['Line()(uint256)'], [['Line', from_rad]]),
+        Call(MCD_VAT, ['debt()(uint256)'], [['debt', from_rad]]),
+        Call(MCD_VAT, ['vice()(uint256)'], [['vice', from_rad]]),
+        Call(MCD_VAT, ['dai(address)(uint256)', MCD_VOW], [['vow_dai', from_rad]]),
+        Call(MCD_VAT, ['sin(address)(uint256)', MCD_VOW], [['vow_sin', from_rad]]),
+        Call(MCD_VAT, ['ilks(bytes32)((uint256,uint256,uint256,uint256,uint256))', b'ETH-A'], [['eth_ilk', from_ilk]]),
+        Call(MCD_VAT, ['ilks(bytes32)((uint256,uint256,uint256,uint256,uint256))', b'BAT-A'], [['bat_ilk', from_ilk]]),
+        Call(MCD_VAT, ['ilks(bytes32)((uint256,uint256,uint256,uint256,uint256))', b'SAI'], [['sai_ilk', from_ilk]]),
+        Call(MCD_VOW, ['hump()(uint256)'], [['surplus_buffer', from_rad]]),
+        Call(MCD_VOW, ['sump()(uint256)'], [['debt_size', from_rad]]),
+        Call(MCD_VOW, ['Ash()(uint256)'], [['ash', from_rad]]),
+        Call(MCD_VOW, ['Sin()(uint256)'], [['sin', from_rad]]),
+        Call(MCD_DAI, ['totalSupply()(uint256)'], [['dai_supply', from_wad]]),
+        Call(MCD_DAI, ['balanceOf(address)(uint256)', UNISWAP_EXCHANGE], [['uniswap_dai', from_wad]]),
+        Call(SAI, ['totalSupply()(uint256)'], [['sai_supply', from_wad]]),
+        Call(SAI, ['balanceOf(address)(uint256)', MCD_JOIN_SAI], [['sai_locked', from_wad]]),
+        Call(MCD_GOV, ['balanceOf(address)(uint256)', GEM_PIT], [['gem_pit', from_wad]]),
+        Call(ETH, ['balanceOf(address)(uint256)', MCD_JOIN_ETH_A], [['eth_locked', from_wad]]),
+        Call(BAT, ['totalSupply()(uint256)'], [['bat_supply', from_wad]]),
+        Call(BAT, ['balanceOf(address)(uint256)', MCD_JOIN_BAT_A], [['bat_locked', from_wad]]),
+        Call(MCD_POT, ['Pie()(uint256)'], [['savings_pie', from_wad]]),
+        Call(MCD_POT, ['chi()(uint256)'], [['pie_chi', from_ray]]),
+        Call(MCD_POT, ['rho()(uint256)'], [['pot_drip', None]]),
+        Call(MCD_POT, ['dsr()(uint256)'], [['dsr', from_ray]]),
+        Call(CDP_MANAGER, ['cdpi()(uint256)'], [['cdps', None]]),
+        Call(MCD_JUG, ['base()(uint256)'], [['base', from_ray]]),
+        Call(MCD_JUG, ['ilks(bytes32)((uint256,uint256))', b'ETH-A'], [['eth_jug', from_jug]]),
+        Call(MCD_JUG, ['ilks(bytes32)((uint256,uint256))', b'BAT-A'], [['bat_jug', from_jug]]),
+        Call(MCD_JUG, ['ilks(bytes32)((uint256,uint256))', b'SAI'], [['sai_jug', from_jug]]),
+        Call(MCD_FLIP_ETH_A, ['kicks()(uint256)'], [['eth_kicks', None]]),
+        Call(MCD_FLIP_BAT_A, ['kicks()(uint256)'], [['bat_kicks', None]]),
+        Call(MCD_SPOT, ['ilks(bytes32)((address,uint256))', b'ETH-A'], [['eth_mat', from_spot]]),
+        Call(MCD_SPOT, ['ilks(bytes32)((address,uint256))', b'BAT-A'], [['bat_mat', from_spot]]),
+        Call(CHAI, ['totalSupply()(uint256)'], [['chai_supply', from_wad]]),
+        Call(MCD_GOV, ['totalSupply()(uint256)'], [['mkr_supply', from_wad]]),
+    ]
+    ,_w3= w3
+    )
     data = multi()
     data['eth_fee'] = get_fee(data['base'], data['eth_jug'])
     data['bat_fee'] = get_fee(data['base'], data['bat_jug'])
@@ -143,7 +145,11 @@ def main():
     print(f'ETH Stability Fee: {data.eth_fee:.2f}%')
     print()
     print(f'BAT Locked: {data.bat_locked:,.0f} ({data.bat_locked / data.bat_supply:.2%} supply)')
-    print(f'BAT Ceiling: {data.bat_ilk.line:,.0f} Dai ({data.bat_ilk.Art * data.bat_ilk.rate / data.bat_ilk.line:.2%} util.)')
+
+    if data.bat_ilk.line == 0:
+        print(f'BAT Ceiling: {data.bat_ilk.line:,.0f} Dai')
+    else:
+        print(f'BAT Ceiling: {data.bat_ilk.line:,.0f} Dai ({data.bat_ilk.Art * data.bat_ilk.rate / data.bat_ilk.line:.2%} util.)')
     print(f'BAT Stability Fee: {data.bat_fee:.2f}%')
     print()
     print(f'Dai (ERC20) Supply: {data.dai_supply:,.0f} ({data.dai_supply / data.debt:.2%})')
